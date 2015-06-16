@@ -38,7 +38,8 @@ var express = require("express");
 var app = express();
 var expressWs = require("express-ws")(app);
 var path = require("path");
-
+var fs = require("fs");
+var filename = "data_" + (new Date()).getTime() + ".csv";
 
 var pins = {};
 
@@ -47,6 +48,7 @@ pins.red = new Gpio(15, "low");
 pins.green = new Gpio(14, "low");
 pins.hall = new Gpio(4, "in", "both");
 
+var logInterval = 1000 * 6;
 var recording = false;
 var trips = 0;
 var lasttrip;
@@ -54,6 +56,7 @@ var lastrpm;
 var lastobj;
 var lastdie;
 var outputTimer;
+var loggerTimer;
 var tempTimer;
 
 
@@ -87,7 +90,9 @@ broadcast({recording: true});
 		lastdie = 0;
 		recording = true;
 		lastrip = new Date().getTime();
+
 		outputTimer = setInterval(output, 5000);
+		loggerTimer = setInterval(logData, logInterval);
 		tempTimer = setInterval(readTemp, 2000);
 	} else {
 		recording = false;
@@ -96,10 +101,12 @@ broadcast({recording: false});
 		pins.red.write(1);
 		pins.green.write(0);
 		clearInterval(outputTimer);
+		clearInterval(loggerTimer);
 		clearInterval(tempTimer);
 	}
 }
 
+logHeader();
 
 pins.switch.read(function (err, val) {
 	if (!val) {
@@ -125,16 +132,29 @@ function output() {
 	broadcast(data);
 }
 
+function logData() {
+	var data = [(new Date()).getTime(), trips, lastrpm, lastobj, lastdie];
+	writeCSV(data);
+}
+
+function logHeader() {
+	writeCSV(["timestamp", "revolutions", "rpm", "melanger temperature", "ambient temperature"]);
+}
+
+function writeCSV(array) {
+	fs.appendFile(filename, array.join(), aok);
+}
+
 function readTemp() {
 	i2c1.readWord(TMP007.I2CADDR, TMP007.TDIE, function(err, val) {
-		if (err) throw err;
+		aok(err);
 		var buf = new Buffer(2);
 		buf.writeUIntBE(val, 0, 2);
 		var celsius = rawToC(buf.readUIntLE(0, 2));
 		lastdie = CtoF(celsius);
 	});
 	i2c1.readWord(TMP007.I2CADDR, TMP007.TOBJ, function(err, val) {
-		if (err) throw err;
+		aok(err);
 		var buf = new Buffer(2);
 		buf.writeUIntBE(val, 0, 2);
 		var celsius = rawToC(buf.readUIntLE(0, 2));
