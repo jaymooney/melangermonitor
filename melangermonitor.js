@@ -48,7 +48,7 @@ pins.red = new Gpio(15, "low");
 pins.green = new Gpio(14, "low");
 pins.hall = new Gpio(4, "in", "both");
 
-var logInterval = 1000 * 6;
+var logInterval = 1000 * 60; // every minute
 var recording = false;
 var trips = 0;
 var lasttrip;
@@ -142,7 +142,7 @@ function logHeader() {
 }
 
 function writeCSV(array) {
-	fs.appendFile(filename, array.join(), aok);
+	fs.appendFile(filename, array.join() + "\n", aok);
 }
 
 function readTemp() {
