@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Choclometer</title>
+<script>
+var ws;
+var $ = document.getElementById.bind(document);
+
+function setup() {
+	ws = new WebSocket("ws://" + location.host + "/data");
+	ws.onopen = function() {
+		$("status").innerHTML = "Connected!";
+	};
+	ws.onmessage = function(msg) {
+		var data = JSON.parse(msg.data);
+		if (data.recording === true) {
+			$("recording").innerHTML = "recording";
+		} else if (data.recording === false) {
+			$("recording").innerHTML = "stopped";
+		}
+
+		if (data.objtemp) {
+			$("rpm").innerHTML = Math.round(data.rpm);
+			$("objtemp").innerHTML = data.objtemp;
+			$("dietemp").innerHTML = data.dietemp;
+		}
+		console.log(data);
+	};
+
+	ws.onclose = function() {
+		$("status").innerHTML = "Connection lost.";
+		$("status").style.textColor = "red";
+	};
+}
+
+</script>
+</head>
+<body onload="setup()">
+
+<h3 id="status">Connecting...</h3>
+<h4 id="recording"></h4>
+
+<h2 style="float: right"><span id="rpm"></span>rpm</h2>
+Temperature: <span id="objtemp"></span>° F
+<br/><br/>
+Sensor temperature: <span id="dietemp"></span>° F
+</body>
+</html>
