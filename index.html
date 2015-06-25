@@ -2,6 +2,22 @@
 <html>
 <head>
 <title>Choclometer</title>
+<style type="text/css">
+.thetable {
+	border-spacing: 0;
+	border: 1px solid #ccc;
+}
+.thetable thead {
+	background-color: #eee;
+}
+
+.thetable th, .thetable td {
+	padding: 0.5em 1em;
+}
+
+
+
+</style>
 <script>
 var ws;
 var $ = document.getElementById.bind(document);
@@ -23,8 +39,9 @@ function setup() {
 			$("rpm").innerHTML = Math.round(data.rpm);
 			$("objtemp").innerHTML = data.objtemp;
 			$("dietemp").innerHTML = data.dietemp;
+			$("revs").innerHTML = data.trips;
 		}
-		console.log(data);
+//		console.log(data);
 	};
 
 	ws.onclose = function() {
@@ -40,9 +57,23 @@ function setup() {
 <h3 id="status">Connecting...</h3>
 <h4 id="recording"></h4>
 
-<h2 style="float: right"><span id="rpm"></span>rpm</h2>
-Temperature: <span id="objtemp"></span>° F
-<br/><br/>
-Sensor temperature: <span id="dietemp"></span>° F
+<table class="thetable">
+<thead>
+<tr>
+	<th>Temperature</th>
+	<th>Ambient Temperature</th>
+	<th>Revolutions</th>
+	<th>RPM</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+	<td><span id="objtemp"></span>° F</td>
+	<td><span id="dietemp"></span>° F</td>
+	<td id="revs"></td>
+	<td><span id="rpm"></span></td>
+</tr>
+</tbody>
+</table>
 </body>
 </html>
