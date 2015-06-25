@@ -39,7 +39,7 @@ var app = express();
 var expressWs = require("express-ws")(app);
 var path = require("path");
 var fs = require("fs");
-var filename = "data_" + (new Date()).getTime() + ".csv";
+var filename = "/home/pi/dev/sensor-server/data_" + (new Date()).getTime() + ".csv";
 
 var pins = {};
 
@@ -80,7 +80,7 @@ pins.switch.watch(toggleSwitch);
 function toggleSwitch(err, value) {
 	if (err) throw err;
 	if (value) {
-console.log("start recording");
+//console.log("start recording");
 broadcast({recording: true});
 		pins.red.write(0);
 		pins.green.write(1);
@@ -96,7 +96,7 @@ broadcast({recording: true});
 		tempTimer = setInterval(readTemp, 2000);
 	} else {
 		recording = false;
-console.log("stopped recording");
+//console.log("stopped recording");
 broadcast({recording: false});
 		pins.red.write(1);
 		pins.green.write(0);
@@ -124,16 +124,16 @@ function setupTMP007(err) {
 }
 
 function output() {
-	console.log("tripped " + trips + " times, " + lastrpm + "rpm");
-	console.log("die temp: " + lastdie + " F");
-	console.log("obj temp: " + lastobj + " F");
+//	console.log("tripped " + trips + " times, " + lastrpm + "rpm");
+//	console.log("die temp: " + lastdie + " F");
+//	console.log("obj temp: " + lastobj + " F");
 	
 	var data = {trips: trips, rpm: lastrpm, dietemp: lastdie, objtemp: lastobj};
 	broadcast(data);
 }
 
 function logData() {
-	var data = [(new Date()).getTime(), trips, lastrpm, lastobj, lastdie];
+	var data = [(new Date()).toISOString(), trips, lastrpm, lastobj, lastdie];
 	writeCSV(data);
 }
 
@@ -163,8 +163,12 @@ function readTemp() {
 }
 
 function aok(err) {
-	if (err) throw err;
+	if (err) {
+		console.log(err);
+		throw err;
+	}
 }
+
 function rawToC(raw) {
 	return (raw >> 2) * 0.03125;
 }
